@@ -3,7 +3,6 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-
 const Navbar = () => {
   const { user, role, logout } = useAuth();
   const navigate = useNavigate();
@@ -87,6 +86,9 @@ const Navbar = () => {
           <Link to="/courses" className={getNavLinkClasses("/courses")}>
             Courses
           </Link>
+          <Link to="/pricing" className={getNavLinkClasses("/pricing")}>
+            Pricing
+          </Link>
           <Link to="/blogs" className={getNavLinkClasses("/blogs")}>
             Blogs
           </Link>
@@ -102,8 +104,6 @@ const Navbar = () => {
               >
                 Dashboard
               </Link>
-
-              
             </>
           ) : (
             <>
@@ -155,32 +155,55 @@ const Navbar = () => {
               <Link
                 to="/"
                 onClick={handleItemClick}
-                className={`block text-lg font-medium transition duration-300 ${isActive("/") ? "text-green-600" : "text-black hover:text-green-600"
-                  }`}
+                className={`block text-lg font-medium transition duration-300 ${
+                  isActive("/")
+                    ? "text-green-600"
+                    : "text-black hover:text-green-600"
+                }`}
               >
                 Home
               </Link>
               <Link
                 to="/about"
                 onClick={handleItemClick}
-                className={`block text-lg font-medium transition duration-300 ${isActive("/about") ? "text-green-600" : "text-black hover:text-green-600"
-                  }`}
+                className={`block text-lg font-medium transition duration-300 ${
+                  isActive("/about")
+                    ? "text-green-600"
+                    : "text-black hover:text-green-600"
+                }`}
               >
                 About Us
               </Link>
               <Link
                 to="/courses"
                 onClick={handleItemClick}
-                className={`block text-lg font-medium transition duration-300 ${isActive("/courses") ? "text-green-600" : "text-black hover:text-green-600"
-                  }`}
+                className={`block text-lg font-medium transition duration-300 ${
+                  isActive("/courses")
+                    ? "text-green-600"
+                    : "text-black hover:text-green-600"
+                }`}
               >
                 Courses
               </Link>
               <Link
+                to="/pricing"
+                onClick={handleItemClick}
+                className={`block text-lg font-medium transition duration-300 ${
+                  isActive("/pricing")
+                    ? "text-green-600"
+                    : "text-black hover:text-green-600"
+                }`}
+              >
+                Pricing
+              </Link>
+              <Link
                 to="/blogs"
                 onClick={handleItemClick}
-                className={`block text-lg font-medium transition duration-300 ${isActive("/blogs") ? "text-green-600" : "text-black hover:text-green-600"
-                  }`}
+                className={`block text-lg font-medium transition duration-300 ${
+                  isActive("/blogs")
+                    ? "text-green-600"
+                    : "text-black hover:text-green-600"
+                }`}
               >
                 Blogs
               </Link>
