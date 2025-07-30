@@ -251,19 +251,19 @@ const CourseCard = ({ course, index }) => {
               }`}
           >
             <img src={getLevelIcon(course.difficulty)} alt={course.difficulty} className="w-3 h-3" />
-            {course.difficulty}
+            <span className="pb-0.5">{course.difficulty}</span>
           </div>
 
           {/* Duration Badge */}
-          <div className="flex items-center bg-[#A063F3]/10 rounded-lg py-1 px-1 gap-1">
+          <div className="flex items-center bg-[#A063F3]/10 rounded-lg py-1 px-1.5 gap-1">
             <img src="/time.png" alt="" className="w-3 h-3" />
-            <span className="text-xs font-medium">{course.duration}</span>
+            <span className="text-xs pb-0.5 text-[#A063F3] font-medium">{course.duration}</span>
           </div>
 
           {/* Students Badge */}
-          <div className="flex items-center bg-[#008FA6]/10 rounded-lg py-1 px-2 gap-1">
+          <div className="flex items-center bg-[#008FA6]/10 rounded-lg py-1 px-2.5 gap-1">
             <img src="/people.png" alt="" className="w-3 h-3" />
-            <span className="text-xs font-medium">{course.students.toLocaleString()}</span>
+            <span className="text-xs pb-0.5 text-[#008FA6] font-medium">{course.students.toLocaleString()}</span>
           </div>
         </div>
 
@@ -276,7 +276,7 @@ const CourseCard = ({ course, index }) => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-green-600 text-white font-medium py-2.5 px-3 rounded-lg hover:bg-green-700 transition duration-300 text-sm flex items-center justify-center gap-2"
+              className="w-full bg-[#10903E] text-white font-medium py-2.5 px-3 rounded-lg hover:bg-green-700 transition duration-300 text-sm flex items-center justify-center gap-2"
             >
               <img src="/game.png" alt="Game" className="w-4 h-4" />
               Let's Play &gt;
@@ -289,7 +289,7 @@ const CourseCard = ({ course, index }) => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-orange-400 flex items-center text-white font-medium py-2.5 px-3 rounded-lg hover:bg-orange-500 transition duration-300 text-sm"
+              className="bg-[#D9A30B] flex items-center text-white font-medium py-2.5 px-3 rounded-lg hover:bg-orange-500 transition duration-300 text-sm"
             >
               <img src="/notes.png" alt="Notes" className="w-4 h-4 mr-1" />
               Notes
@@ -445,7 +445,7 @@ const Courses = () => {
             </motion.div>
 
             <h1 className="text-[26px] md:text-5xl  text-white mb-3 leading-tight"
-              style={{ fontFamily: '"Sigmar One", cursive' }}>
+              style={{ fontFamily: '"Sigmar", sans-serif' }} >
               Master New Skills
               <br />
               <div className=" inline-flex text-white">
