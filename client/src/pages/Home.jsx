@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Star, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, ChevronDown, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import { FaArrowUp } from "react-icons/fa";
-
+import { useAuth } from "@/contexts/AuthContext";
+import emailjs from '@emailjs/browser';
 
 // Custom hook for mobile detection
 const useIsMobile = () => {
@@ -22,6 +23,255 @@ const useIsMobile = () => {
   }, []);
 
   return isMobile;
+};
+
+// Trial Booking Modal Component
+const TrialBookingModal = ({ isOpen, onClose }) => {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    class: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState('');
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        fullName: '',
+        email: '',
+        phoneNumber: '',
+        class: ''
+      });
+      setShowSuccess(false);
+      setError('');
+    }
+  }, [isOpen]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      // EmailJS configuration - You need to set these up in your EmailJS account
+      const serviceId = 'service_52co609'; // Replace with your EmailJS service ID
+      const templateId = 'template_50ibn0n'; // Replace with your EmailJS template ID
+      const publicKey = 'zgnJuM3MRywVUxjcR'; // Replace with your EmailJS public key
+
+      const templateParams = {
+        to_email: 'anujyelve3074@gmail.com',
+        subject: 'New Free Trial Request',
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phoneNumber,
+        class: formData.class,
+        message: `A new user wants to book a free trial:
+        Name: ${formData.fullName}
+        Email: ${formData.email}
+        Phone Number: ${formData.phoneNumber}
+        Class: ${formData.class}`
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      setShowSuccess(true);
+      
+      // Close modal after 2 seconds
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setError('Failed to send request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        {/* Backdrop with blur */}
+        <div 
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          onClick={onClose}
+        />
+        
+        {/* Modal */}
+        <motion.div
+          className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ type: "spring", duration: 0.3 }}
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+          >
+            <X className="w-4 h-4 text-gray-500" />
+          </button>
+
+          {/* Modal content */}
+          <div className="p-6 sm:p-8">
+            {!showSuccess ? (
+              <>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Book Your Free Trial
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Fill out the form below and we'll contact you soon!
+                </p>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Full Name */}
+                  <div>
+                    <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="fullName"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-200"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-200"
+                      placeholder="Enter your email address"
+                    />
+                  </div>
+
+                  {/* Phone Number */}
+                  <div>
+                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-200"
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+
+                  {/* Class */}
+                  <div>
+                    <label htmlFor="class" className="block text-sm font-medium text-gray-700 mb-1">
+                      Class/Grade *
+                    </label>
+                    <select
+                      id="class"
+                      name="class"
+                      value={formData.class}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-200"
+                    >
+                      <option value="">Select your class</option>
+                      
+                      <option value="Class 6">Class 6</option>
+                      <option value="Class 7">Class 7</option>
+                      <option value="Class 8">Class 8</option>
+                      <option value="Class 9">Class 9</option>
+                      <option value="Class 10">Class 10</option>
+                      <option value="Class 11">Class 11</option>
+                      <option value="Class 12">Class 12</option>
+                    </select>
+                  </div>
+
+                  {/* Error message */}
+                  {error && (
+                    <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+                      {error}
+                    </div>
+                  )}
+
+                  {/* Submit button */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    {isSubmitting ? 'Sending Request...' : 'Book Free Trial'}
+                  </button>
+                </form>
+              </>
+            ) : (
+              /* Success message */
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Request Sent Successfully!
+                </h3>
+                <p className="text-gray-600">
+                  Thank you! We'll contact you soon to schedule your free trial.
+                </p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
 };
 
 // Progress Card Component
@@ -515,6 +765,8 @@ const Home = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
+  const { user } = useAuth();
 
   const [showScroll, setShowScroll] = useState(false);
 
@@ -529,7 +781,6 @@ const Home = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
 
   // Add mobile autoplay for Feature 2 (circular logo)
   const [feature2AutoHover, setFeature2AutoHover] = useState(false);
@@ -838,7 +1089,6 @@ const Home = () => {
     );
   }
 
-
   const filteredCourses = activeCategory === "All"
     ? courses
     : courses.filter(course => course.category === activeCategory);
@@ -857,13 +1107,18 @@ const Home = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen -mt-8 bg-white overflow-x-hidden">
+      {/* Trial Booking Modal */}
+      <TrialBookingModal 
+        isOpen={isTrialModalOpen} 
+        onClose={() => setIsTrialModalOpen(false)} 
+      />
+
       {/* Hero Section */}
-      <section className="relative h-[90vh] sm:h-[100vh] lg:h-[100vh] w-full p-0 -mt-8">
+      <section className="relative h-[100vh] sm:h-[100vh] lg:h-[95vh] w-full p-0 -mt-8">
         <div className="w-full relative h-full bg-[url('/heroBG.jpg')] bg-cover  bg-center bg-no-repeat">
-          <div className="relative z-10 max-w-7xl mx-auto flex flex-wrap  mt-9  flex-col items-center text-center px-4 sm:px-6">
+          <div className="relative z-10 max-w-7xl mx-auto flex flex-wrap  sm:mt-9  flex-col items-center text-center px-4 sm:px-6">
             {/* Trust Badge */}
             <div className="mb-3 sm:mb-5 pt-3 sm:pt-3 mt-4 sm:mt-6 md:mt-6 md:mb-3">
               <div className="bg-black backdrop-blur-sm rounded-full px-2 sm:px-3 py-1 mt-14 sm:mt-8 border border-white/20">
@@ -894,10 +1149,16 @@ const Home = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-16 w-full sm:w-auto px-4 sm:px-0">
-              <button className="bg-white text-black font-semibold px-4 sm:px-8 py-3 sm:py-4 rounded-md   transition duration-300 cursor-pointer text-sm sm:text-sm">
-                Get Started Free
+              <button 
+                onClick={() => navigate(user ? '/pricing' : '/courses')}
+                className="bg-white text-black font-semibold px-4 sm:px-8 py-3 sm:py-4 rounded-md transition duration-300 cursor-pointer text-sm sm:text-sm hover:bg-gray-100"
+              >
+                {user ? 'Purchase Plan' : 'Get Started Free'}
               </button>
-              <button className="border-2 border-white text-white font-semibold px-4 sm:px-8   py-2 sm:py-3 rounded-md hover:bg-white hover:text-green-600 cursor-pointer transition duration-300 text-sm sm:text-sm flex items-center justify-center gap-2">
+              <button 
+                onClick={() => setIsTrialModalOpen(true)}
+                className="border-2 border-white text-white font-semibold px-4 sm:px-8 py-2 sm:py-3 rounded-md hover:bg-white hover:text-green-600 cursor-pointer transition duration-300 text-sm sm:text-sm flex items-center justify-center gap-2"
+              >
                 Book a trial
               </button>
             </div>
@@ -1034,11 +1295,8 @@ const Home = () => {
 
               {/* Progress Card Component */}
               <div className=" ml-10 h-40">
-
-
                 <img className=" absolute sm:h-[45%] h-[34%] -ml-6 sm:mt-2 z-50 sm:w-[57%]" src="/mid4.png" alt="mid" />
                 <div className="flex sm:w-[60%] w-[60%] ml-15 sm:ml-25 absolute bottom-0 mb-5 left-0 h-18 sm:h-28">
-
                   <ProgressCardComponent />
                 </div>
               </div>
@@ -1285,7 +1543,7 @@ const Home = () => {
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full bg-green-600 text-white font-medium py-2.5 px-3 rounded-lg hover:bg-green-700 transition duration-300 text-sm flex items-center justify-center gap-2"
+                        className="w-full bg-[#10903E] text-white font-medium py-2.5 px-3 rounded-lg hover:bg-green-700 transition duration-300 text-sm flex items-center justify-center gap-2"
                       >
                         <img src="/game.png" alt="Game" className="w-4 h-4" />
                         Let's Play &gt;
@@ -1298,7 +1556,7 @@ const Home = () => {
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="bg-orange-400 flex items-center text-white font-medium py-2.5 px-3 rounded-lg hover:bg-orange-500 transition duration-300 text-sm"
+                        className="bg-[#D9A30B] flex items-center text-white font-medium py-2.5 px-3 rounded-lg hover:bg-orange-500 transition duration-300 text-sm"
                       >
                         <img src="/notes.png" alt="Notes" className="w-4 h-4 mr-1" />
                         Notes
@@ -1316,76 +1574,8 @@ const Home = () => {
               </a>
             
           </div>
-
-
-
         </div>
       </section>
-
-      {/* Testimonials Section
-      <section className="h-auto lg:h-[90vh] md:-mt-10 py-10  lg:py-0">
-        <div className="w-full h-full bg-[#FFFAD1]  sm:bg-[url('/Testimonial.png')] sm:bg-contain sm:bg-contain sm:bg-center sm:bg-no-repeat">
-          <div className="max-w-7xl mx-auto px-4 sm:px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 place-items-center h-auto lg:h-screen py-10 lg:py-0">
-              <div className="order-1 relative lg:order-1 mr-0 md:pt-69 md:-mt-40 lg:mr-5 lg:mb-20 ">
-                <div><img className=" h-35 w-35 sm:h-0 sm:w-0 lg:h-0  ml-1 -mt-10 lg:w-0 absolute top-0 left-0" src="/test1.svg" alt="" /></div>
-                <p className="text-lg sm:text-xl mt-20 text-gray-700 mb-6 sm:mb-8 md:w-[50%]  md:text-xs lg:text-3xl lg:w-[100%] leading-relaxed font-medium italic">
-                  {currentTestimonial.quote}
-                </p>
-
-                <div className="flex items-center lg:mt-30 justify-between">
-                  <div>
-                    <h4 className="text-sm sm:text-lg md:text-md lg:text-3xl font-bold text-black">
-                      {currentTestimonial.name}
-                    </h4>
-                    <p className="text-gray-600 text-sm  md:text-sm lg:text-sm sm:text-base">{currentTestimonial.title}</p>
-                  </div>
-
-                  <div className="flex md:mr-80 lg:mr-0 gap-2">
-                    <button
-                      onClick={prevTestimonial}
-                      className="p-2 rounded-full bg-white  hover:bg-gray-100 transition duration-300"
-                    >
-                      <ChevronLeft className="w-4 sm:w-5 h-4 sm:h-5" />
-                    </button>
-                    <button
-                      onClick={nextTestimonial}
-                      className="p-2 rounded-full bg-white hover:bg-gray-100 transition duration-300"
-                    >
-                      <ChevronRight className="w-4 sm:w-5 h-4 sm:h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="order-2 lg:order-2  flex justify-center ml-0 lg:ml-10">
-                <div className="relative z-10">
-                  <div><img className="h-37 w-37 sm:h-0 sm:w-0 lg:h-0 lg:w-0 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -mt-10  -ml-5 " src="/testbg.png" alt="" /></div>
-                  <div className="w-70 h-70 -mb-10 sm:w-90 sm:h-90 md:-mt-61 md:ml-100 md:h-70 md:w-70 lg:w-119 lg:h-150 lg:-mb-16 lg:mr-100 lg:mt-1  relative overflow-hidden">
-                    <img
-                      key={`img-${currentIndex}`}
-                      src={currentTestimonial.image}
-                      alt={currentTestimonial.name}
-                      className="w-full h-full object-contain rounded-lg shadow-2xl animate-fadeIn"
-                      onError={(e) => {
-                        // Fallback to placeholder if image fails to load
-                        e.target.src = `data:image/svg+xml;base64,${btoa(`
-                      <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="100%" height="100%" fill="#f3f4f6"/>
-                        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="24" fill="#9ca3af" text-anchor="middle" dy=".3em">
-                          ${currentTestimonial.name}
-                        </text>
-                      </svg>
-                    `)}`;
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> */}
 
       {/* Student Feedback Section - CAROUSEL */}
       <section className="py-10 sm:py-20 bg-white">
